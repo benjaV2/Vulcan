@@ -13,11 +13,16 @@ API_KEY = "9ZHMPEBGCOUKH389H29X41S6P99C9LRMVME1RQ7088IG0U6FOT3WDBM2VW7OND4T"
 
 # Create your views here.
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger("Views.py")
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 
 def serialize_plugin(raw_plugin):
     plugin = {}
-    plugin['PluginID'] = raw_plugin['_source']['PluginID']
+    plugin['pluginID'] = raw_plugin['_source']['pluginID']
     plugin['published'] = raw_plugin['_source']['published']
     plugin['title'] = raw_plugin['_source']['title']
     plugin['cvelist'] = raw_plugin['_source']['cvelist']
@@ -28,7 +33,6 @@ def serialize_plugin(raw_plugin):
 class plugin_fetcher(APIView):
     def get(self, request):
         logger.info("starting plugin listing")
-        print("I'm in")
         response = requests.get(VULNER_URL + "/archive/collection/?type=nessus", params={'apiKey': API_KEY})
         logger.info("plugin json zip filed fetched")
         with zipfile.ZipFile(io.BytesIO(response.content)) as zip_files:
