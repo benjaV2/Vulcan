@@ -12,6 +12,7 @@ from pymongo import MongoClient
 VULNER_URL = os.environ.get("VULNER_API", "https://vulners.com/api/v3")
 API_KEY = os.environ.get("API_KEY", "9ZHMPEBGCOUKH389H29X41S6P99C9LRMVME1RQ7088IG0U6FOT3WDBM2VW7OND4T")
 MONGO_URL = os.environ.get("MONGO_URL", "10.0.130.73")
+SKIP_DB_INIT = os.environ.get("skip_db_init", False)
 
 # Create your views here.
 
@@ -33,6 +34,9 @@ def serialize_plugin(raw_plugin):
 
 
 def init_db():
+    if SKIP_DB_INIT:
+        logger.info("skipping init db")
+        return
     logger.info("starting init db")
     response = requests.get(VULNER_URL + "/archive/collection/?type=nessus", params={'apiKey': API_KEY})
     logger.info("plugin json zip filed fetched")
@@ -45,6 +49,7 @@ def init_db():
     client = MongoClient(MONGO_URL, 27017)
     table = client.URL.plugins
     table.insert_many(mongo_payload)
+    table.create_index([('pluginID', 1)], unique=True, name="pluginID")
     logger.info("db write operation success")
 
 
