@@ -1,15 +1,18 @@
 
 First you need to setup a mongo db (ubuntu server instructions):
 
-MONGO INSTALLATION
-   sudo apt install docker.io
-   sudo docker pull mongo
-   sudo docker run -it --name mongodb -p 27017:27017 -d mongo
+## MONGO INSTALLATION
+    ```
+    sudo apt install docker.io
+    sudo docker pull mongo
+    sudo docker run -it --name mongodb -p 27017:27017 -d mongo
+    ```
 
 
 Then you can install the app:
 
-APPLICATION INSTALLATION:
+## APPLICATION INSTALLATION:
+    ```
     clone the repo into your application server
     cd into API_SERVER
     pip install -r requirments.txt
@@ -17,11 +20,14 @@ APPLICATION INSTALLATION:
     python manage runserver 0.0.0.0
     on the first run the app will init the mongo db and populate it with data
     this can be skipped on next runs by setting SKIP_DB_INIT env var to 1
+    ```
 
 
-API EXPLANATION:
+## API EXPLANATION:
+    ```
     you can now use the api.
     the API consist of 3 get methods:
+    ```
 
     GET APP_SERVER_IP:port/plugins/id/<plugin_id>
         searches for the plugin with the specific id
