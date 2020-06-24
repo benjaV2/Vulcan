@@ -17,7 +17,7 @@ Then you can install the app:
     cd into API_SERVER
     pip install -r requirments.txt
     set MONGO_URL env var to the mongo server IP
-    python manage runserver 0.0.0.0
+    python manage runserver 0.0.0.0:port
     on the first run the app will init the mongo db and populate it with data
     this can be skipped on next runs by setting SKIP_DB_INIT env var to 1
     ```
