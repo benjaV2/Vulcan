@@ -57,7 +57,7 @@ def plugin_get_all(request, order):
         if order in ['pluginID', 'score', 'published']:
             cursor = table.find({}, {"_id": False}).sort(order, 1)
         else:
-            return  Response("bad order key")
+            return Response("bad order key")
     else:
         cursor = table.find({}, {"_id": False})
     logger.info(f'all plugins fetched')
@@ -79,7 +79,7 @@ def plugin_search_by_cve(request, cve):
     logger.info(f'Searching for plugins with cve {cve}')
     client = MongoClient(MONGO_URL, 27017)
     table = client.URL.plugins
-    cursor = table.find({"cvelist": cve}, {"_id": False})
+    cursor = table.find({"cvelist": cve}, {"_id": False, "cvelist": False})
     logger.info(f'plugins with cve {cve} fetched')
     return Response([x for x in cursor])
 
