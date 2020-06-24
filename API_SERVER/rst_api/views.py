@@ -11,6 +11,7 @@ VULNER_URL = os.environ.get("VULNER_API", "https://vulners.com/api/v3")
 API_KEY = os.environ.get("API_KEY", "9ZHMPEBGCOUKH389H29X41S6P99C9LRMVME1RQ7088IG0U6FOT3WDBM2VW7OND4T")
 MONGO_URL = os.environ.get("MONGO_URL", "10.0.130.73")
 SKIP_DB_INIT = os.environ.get("skip_db_init", False)
+PLUGIN_TYPE = "nessus"
 
 # Create your views here.
 
@@ -36,16 +37,16 @@ def init_db():
         logger.info("skipping init db")
         return
     logger.info("starting init db")
-    response = requests.get(VULNER_URL + "/archive/collection/?type=nessus", params={'apiKey': API_KEY})
+    response = requests.get(f"{VULNER_URL}/archive/collection/?type={PLUGIN_TYPE}", params={'apiKey': API_KEY})
     logger.info("plugin json zip filed fetched")
     with zipfile.ZipFile(io.BytesIO(response.content)) as zip_files:
         for zip_file in zip_files.infolist():
             rs = json.load(zip_files.open(zip_file))
     logger.info("json plugin file extracted")
     mongo_payload = [serialize_plugin(plugin) for plugin in rs]
-    logger.info("mongo payload ready")
+    logger.info(f"mongo payload ready. inserting to {MONGO_URL}")
     client = MongoClient(MONGO_URL, 27017)
-    table = client.URL.plugins
+    table = client.plugins[PLUGIN_TYPE]
     table.insert_many(mongo_payload)
     table.create_index([('pluginID', 1)], unique=True, name="pluginID")
     logger.info("db write operation success")
@@ -55,7 +56,7 @@ def init_db():
 def plugin_get_all(request, order):
     logger.info(f'fetching all plugins')
     client = MongoClient(MONGO_URL, 27017)
-    table = client.URL.plugins
+    table = client.plugins[PLUGIN_TYPE]
     if order != '':
         if order in ['pluginID', 'score', 'published']:
             cursor = table.find({}, {"_id": False}).sort(order, 1)
@@ -71,7 +72,7 @@ def plugin_get_all(request, order):
 def plugin_search_by_id(request, plugin_id):
     logger.info(f'Searching for plugin {plugin_id}')
     client = MongoClient(MONGO_URL, 27017)
-    table = client.URL.plugins
+    table = client.plugins[PLUGIN_TYPE]
     cursor = table.find({"pluginID": plugin_id}, {"_id": False})
     logger.info(f'plugin {plugin_id} fetched')
     return Response([x for x in cursor])
@@ -81,7 +82,7 @@ def plugin_search_by_id(request, plugin_id):
 def plugin_search_by_cve(request, cve):
     logger.info(f'Searching for plugins with cve {cve}')
     client = MongoClient(MONGO_URL, 27017)
-    table = client.URL.plugins
+    table = client.plugins[PLUGIN_TYPE]
     cursor = table.find({"cvelist": cve}, {"_id": False, "cvelist": False})
     logger.info(f'plugins with cve {cve} fetched')
     return Response([x for x in cursor])

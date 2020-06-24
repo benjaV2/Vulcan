@@ -23,3 +23,5 @@ urlpatterns = [
     path('plugins/id/<plugin_id>/', views.plugin_search_by_id),
     path('plugins/cve/<cve>/', views.plugin_search_by_cve)
 ]
+
+views.init_db()

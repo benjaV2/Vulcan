@@ -6,4 +6,5 @@ class RstApiConfig(AppConfig):
     name = 'rst_api'
 
     def ready(self):
-        views.init_db()
+        # views.init_db()
+        pass
