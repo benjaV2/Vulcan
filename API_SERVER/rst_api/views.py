@@ -32,17 +32,22 @@ def serialize_plugin(raw_plugin):
     return plugin
 
 
-def init_db():
-    if SKIP_DB_INIT:
-        logger.info("skipping init db")
-        return
-    logger.info("starting init db")
+def fetch_and_extract_plugin_file():
     response = requests.get(f"{VULNER_URL}/archive/collection/?type={PLUGIN_TYPE}", params={'apiKey': API_KEY})
     logger.info("plugin json zip filed fetched")
     with zipfile.ZipFile(io.BytesIO(response.content)) as zip_files:
         for zip_file in zip_files.infolist():
             rs = json.load(zip_files.open(zip_file))
     logger.info("json plugin file extracted")
+    return rs
+
+
+def init_db():
+    if SKIP_DB_INIT:
+        logger.info("skipping init db")
+        return
+    logger.info("starting init db")
+    rs = fetch_and_extract_plugin_file()
     mongo_payload = [serialize_plugin(plugin) for plugin in rs]
     logger.info(f"mongo payload ready. inserting to {MONGO_URL}")
     client = MongoClient(MONGO_URL, 27017)
@@ -50,6 +55,18 @@ def init_db():
     table.insert_many(mongo_payload)
     table.create_index([('pluginID', 1)], unique=True, name="pluginID")
     logger.info("db write operation success")
+
+
+def update_db():
+    logger.info("starting update db")
+    rs = fetch_and_extract_plugin_file()
+    mongo_payload = [serialize_plugin(plugin) for plugin in rs]
+    logger.info(f"mongo payload ready. updating {MONGO_URL}")
+    client = MongoClient(MONGO_URL, 27017)
+    table = client.plugins[PLUGIN_TYPE]
+    for plugin in mongo_payload:
+        table.update({"pluginID": plugin["pluginID"]}, plugin, True)
+    logger.info("db update operation success")
 
 
 @api_view(('GET',))
@@ -86,9 +103,3 @@ def plugin_search_by_cve(request, cve):
     cursor = table.find({"cvelist": cve}, {"_id": False, "cvelist": False})
     logger.info(f'plugins with cve {cve} fetched')
     return Response([x for x in cursor])
-
-
-
-
-
-
