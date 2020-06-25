@@ -28,6 +28,12 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+VULNER_URL = os.environ.get("VULNER_API", "https://vulners.com/api/v3")
+API_KEY = os.environ.get("API_KEY", "9ZHMPEBGCOUKH389H29X41S6P99C9LRMVME1RQ7088IG0U6FOT3WDBM2VW7OND4T")
+MONGO_URL = os.environ.get("MONGO_URL", "10.0.130.73")
+PLUGIN_TYPE = "nessus"
+
+
 # Application definition
 
 INSTALLED_APPS = [

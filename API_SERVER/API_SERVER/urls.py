@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
-from rst_api import views
+from rst_api import views, db_utils
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,4 +24,4 @@ urlpatterns = [
     path('plugins/cve/<cve>/', views.plugin_search_by_cve)
 ]
 
-views.init_db()
+db_utils.init_db()
