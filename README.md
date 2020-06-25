@@ -17,6 +17,7 @@ Then you can install the app:
     cd into API_SERVER
     pip install -r requirments.txt
     set MONGO_URL env var to the mongo server IP
+    add your host IP to ALLOWED_HOSTS in settings
     python manage runserver 0.0.0.0:port
     on the first run the app will init the mongo db and populate it with data
     ```
