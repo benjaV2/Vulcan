@@ -3,7 +3,7 @@ import io
 import zipfile
 import json
 import logging
-from pymongo import MongoClient
+from pymongo import MongoClient, UpdateOne
 from API_SERVER.settings import MONGO_URL, PLUGIN_TYPE, API_KEY, VULNER_URL
 
 
@@ -63,7 +63,9 @@ def update_db():
     mongo_payload = [serialize_plugin(plugin) for plugin in rs]
     logger.info(f"mongo payload ready. updating {MONGO_URL}")
     client = MongoClient(MONGO_URL, 27017)
+    operations = []
     table = client.plugins[PLUGIN_TYPE]
     for plugin in mongo_payload:
-        table.update({"pluginID": plugin["pluginID"]}, plugin, True)
+        operations.append(UpdateOne({"pluginID": plugin["pluginID"]}, plugin, True))
+    table.bulk_write(operations)
     logger.info("db update operation success")
