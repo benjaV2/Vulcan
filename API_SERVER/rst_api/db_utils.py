@@ -55,15 +55,3 @@ def init_db():
     table.insert_many(mongo_payload)
     table.create_index([('pluginID', 1)], unique=True, name="pluginID")
     logger.info("db write operation success")
-
-
-def update_db():
-    logger.info("starting update db")
-    rs = fetch_and_extract_plugin_file()
-    mongo_payload = [serialize_plugin(plugin) for plugin in rs]
-    logger.info(f"mongo payload ready. updating {MONGO_URL}")
-    client = MongoClient(MONGO_URL, 27017)
-    table = client.plugins[PLUGIN_TYPE]
-    for plugin in mongo_payload:
-        table.update({"pluginID": plugin["pluginID"]}, plugin, True)
-    logger.info("db update operation success")
